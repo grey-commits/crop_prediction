@@ -5,7 +5,7 @@ import { Card } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { toast } from "sonner";
-import { MapPin } from "lucide-react"; // Import map icon
+import { MapPin } from "lucide-react"; // Import map icon (if you want to use it)
 
 export function SoilSamplingForm() {
   const navigate = useNavigate();
@@ -15,19 +15,19 @@ export function SoilSamplingForm() {
     potassium: "",
     temperature: "",
     humidity: "",
-    ph: "", // Added pH field
+    ph: "",
     rainfall: "",
     soilType: "",
-    location: "", // Added location field
+    location: "",
   });
 
-  const [useLocation, setUseLocation] = useState(false); // Toggle for location-based data
+  const [useLocation, setUseLocation] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://crop-prediction-645c.onrender.com/predict", { // Updated URL for Render backend
+      const response = await fetch("https://crop-prediction-645c.onrender.com/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,27 +39,28 @@ export function SoilSamplingForm() {
             parseFloat(formData.potassium),
             parseFloat(formData.temperature),
             parseFloat(formData.humidity),
-            parseFloat(formData.ph), // Include pH in the request
+            parseFloat(formData.ph),
             parseFloat(formData.rainfall),
           ],
           soilType: formData.soilType,
-          location: formData.location, // Include location in the request
+          location: formData.location,
         }),
       });
 
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Backend error:", errorData);
         throw new Error("Failed to fetch prediction from the server.");
       }
 
       const data = await response.json();
       toast.success(`Recommended Crop: ${data.prediction}`);
 
-      // Navigate to the Results page with the required data
       navigate("/results", {
         state: {
           ph: formData.ph,
           moisture: formData.humidity,
-          texture: formData.soilType, // Assuming soilType represents texture
+          texture: formData.soilType,
         },
       });
     } catch (error) {
@@ -75,7 +76,7 @@ export function SoilSamplingForm() {
 
   const fetchLocationData = async () => {
     try {
-      // Replace with your actual API for fetching weather data based on location
+      // Replace YOUR_API_KEY with your actual API key for weatherapi.com or similar
       const response = await fetch("https://api.weatherapi.com/v1/current.json?key=YOUR_API_KEY&q=auto:ip");
       if (!response.ok) {
         throw new Error("Failed to fetch location data.");
@@ -146,7 +147,7 @@ export function SoilSamplingForm() {
               />
             </div>
             <div>
-              <Label htmlFor="ph">pH Level (0.00 - 14.00)</Label> {/* Added pH input */}
+              <Label htmlFor="ph">pH Level (0.00 - 14.00)</Label>
               <Input
                 id="ph"
                 name="ph"
@@ -162,10 +163,10 @@ export function SoilSamplingForm() {
             </div>
             <div>
               <Label>Temperature, Humidity, and Rainfall</Label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-4">
                 <Button
                   type="button"
-                  variant={useLocation ? "default" : "outline"} // Updated variant
+                  variant={useLocation ? "default" : "outline"}
                   className={useLocation ? "bg-blue-500 text-white" : ""}
                   onClick={() => {
                     setUseLocation(true);
@@ -176,7 +177,7 @@ export function SoilSamplingForm() {
                 </Button>
                 <Button
                   type="button"
-                  variant={!useLocation ? "default" : "outline"} // Updated variant
+                  variant={!useLocation ? "default" : "outline"}
                   className={!useLocation ? "bg-blue-500 text-white" : ""}
                   onClick={() => setUseLocation(false)}
                 >
