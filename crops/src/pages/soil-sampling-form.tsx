@@ -6,6 +6,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { toast } from "sonner";
 import { MapPin } from "lucide-react"; // Import map icon (if you want to use it)
+import { useEffect } from "react";
 
 export function SoilSamplingForm() {
   const navigate = useNavigate();
@@ -19,7 +20,82 @@ export function SoilSamplingForm() {
     rainfall: "",
     soilType: "",
     location: "",
+    suitableCrops: [] as { name: string; probability: number }[],
   });
+
+  // Fetch suitable crops whenever the main form fields change and are all filled
+  const fetchSuitableCrops = async () => {
+    // Only fetch if all required fields are filled
+    if (
+      formData.nitrogen &&
+      formData.phosphorus &&
+      formData.potassium &&
+      formData.temperature &&
+      formData.humidity &&
+      formData.ph &&
+      formData.rainfall &&
+      formData.soilType
+    ) {
+      try {
+        const response = await fetch("https://crop-prediction-645c.onrender.com/predict-probabilities", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            features: [
+              parseFloat(formData.nitrogen),
+              parseFloat(formData.phosphorus),
+              parseFloat(formData.potassium),
+              parseFloat(formData.temperature),
+              parseFloat(formData.humidity),
+              parseFloat(formData.ph),
+              parseFloat(formData.rainfall),
+            ],
+            soilType: formData.soilType,
+            location: formData.location,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch suitable crops.");
+        }
+
+        const data = await response.json();
+        // Expecting data.suitableCrops to be an array of { name, probability }
+        setFormData((prev) => ({
+          ...prev,
+          suitableCrops: Array.isArray(data.suitableCrops) ? data.suitableCrops : [],
+        }));
+      } catch (error) {
+        setFormData((prev) => ({
+          ...prev,
+          suitableCrops: [],
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        suitableCrops: [],
+      }));
+    }
+  };
+
+  // Watch for changes in form fields to fetch suitable crops
+  // (useEffect is needed for this)
+  useEffect(() => {
+    fetchSuitableCrops();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    formData.nitrogen,
+    formData.phosphorus,
+    formData.potassium,
+    formData.temperature,
+    formData.humidity,
+    formData.ph,
+    formData.rainfall,
+    formData.soilType,
+  ]);
 
   const [useLocation, setUseLocation] = useState(false);
 
@@ -134,18 +210,32 @@ export function SoilSamplingForm() {
             <div>
               <Label htmlFor="potassium">Potassium (K) (0.00 - 200.00)</Label>
               <Input
-                id="potassium"
-                name="potassium"
-                type="number"
-                min="0"
-                max="200"
-                step="0.01"
-                value={formData.potassium}
-                onChange={handleInputChange}
-                placeholder="Enter Potassium value"
-                required
+              id="potassium"
+              name="potassium"
+              type="number"
+              min="0"
+              max="200"
+              step="0.01"
+              value={formData.potassium}
+              onChange={handleInputChange}
+              placeholder="Enter Potassium value"
+              required
               />
             </div>
+            {/* Suitable Crops Results */}
+            {formData.suitableCrops && formData.suitableCrops.length > 0 && (
+              <div className="mt-4">
+              <Label>Top 5 Suitable Crops</Label>
+              <ul className="list-disc pl-5">
+                {formData.suitableCrops.slice(0, 5).map((crop: { name: string; probability: number }, idx: number) => (
+                <li key={idx} className="flex justify-between">
+                  <span>{crop.name}</span>
+                  <span className="font-semibold">{(crop.probability * 100).toFixed(2)}%</span>
+                </li>
+                ))}
+              </ul>
+              </div>
+            )}
             <div>
               <Label htmlFor="ph">pH Level (0.00 - 14.00)</Label>
               <Input
