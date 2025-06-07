@@ -1,0 +1,56 @@
+.DS_Store
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+*.env
+*.venv
+
+# MacOS metadata
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Python-specific cache
+*.log
+*.pot
+*.pyc
+*.pyd
+
+
+
+# VS Code settings
+.vscode/
+
+# Environment & secret files
+.env
+.env.*
+
+# Flask server files (optional if auto-generated)
+instance/
+*.db
+
+# Node (if using React frontend)
+node_modules/
+dist/
+build/
+
+# Coverage & test files
+coverage/
+htmlcov/
+.cache/
+*.cover
+*.log
+
+# System-specific
+Thumbs.db
+ehthumbs.db
