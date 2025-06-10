@@ -129,7 +129,7 @@ def predict_probabilities(model, scaler, user_data, label_encoder):
     return sorted_probs
 
 def main():
-    csv_file = os.path.join(BASE_DIR, 'crop_recommendation_cleaned.csv')
+    csv_file = os.path.join(BASE_DIR, 'data/crop_recommendation_cleaned.csv')
     model_file = os.path.join(BASE_DIR, 'crop_recommendation_model.pkl')
     scaler_file = os.path.join(BASE_DIR, 'crop_recommendation_scaler.pkl')
     label_file = os.path.join(BASE_DIR, 'crop_recommendation_label_encoder.pkl')
